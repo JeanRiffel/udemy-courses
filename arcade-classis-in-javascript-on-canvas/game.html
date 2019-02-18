@@ -1,11 +1,8 @@
+<!DOCTYPE html>
 <html>
 
-
-    <canvas id="gameCanvas" width="800" height="600"> 
-        
-
+    <canvas id="gameCanvas" width="800" height="600" > 
     </canvas>
-
     
     <script>
         var canvas;
@@ -16,8 +13,24 @@
         var ballSpeedY = 4;
 
         var paddle1Y = 250
+        var paddle2Y = 250
+
         const PADDLE_HEIGHT = 100
+        const PADDLE_THINCKNESS = 10
     
+        function calculateMousePos(evt){
+
+            var rect = canvas.getBoundingClientRect()
+            var root = document.documentElement
+            var mouseX = evt.clientX - rect.left - root.scrollLeft
+            var mouseY = evt.clientY - rect.top - root.scrollTop
+            
+            return {
+                x : mouseX,
+                y : mouseY
+            }        
+        }
+        
         window.onload = function() {
 
             canvas = document.getElementById("gameCanvas")
@@ -31,18 +44,42 @@
 
             }, 1000/framesPerSecond)            
             
+            canvas.addEventListener('mousemove',
+                function (evt){
+                    var mousePos = calculateMousePos(evt)
+                    paddle1Y = mousePos.y - (PADDLE_HEIGHT /2 )
+                })
         }             
+
+        function ballReset(){
+                ballSpeedX = -ballSpeedX
+                ballX = canvas.width / 2
+                ballY = canvas.height / 2
+        }
 
         function moveEverything(){
             ballX = ballX + ballSpeedX
             ballY = ballY + ballSpeedY
-            //ballSpeedX = ballSpeedX + 1;
+            
             if (ballX < 0){
-                ballSpeedX = -ballSpeedX
+                if ( ballY > paddle1Y   && 
+                     ballY < paddle1Y+PADDLE_HEIGHT )
+                {
+                    ballSpeedX = -ballSpeedX
+                }else {
+                    ballReset()
+                }                
             }
 
             if (ballX > canvas.width){
-                ballSpeedX = -ballSpeedX
+                if ( ballY > paddle2Y   && 
+                     ballY < paddle2Y+PADDLE_HEIGHT )
+                {
+                    ballSpeedX = -ballSpeedX
+                }else {
+                    ballReset()
+                }                
+
             }
 
             if (ballY < 0){
@@ -55,10 +92,14 @@
 
         }
 
-
         function drawEverything(){            
             colorRect(0,0,canvas.width, canvas.height, 'black')
-            colorRect(0, 210, 10, 100, 'white')
+            
+            colorRect(0, paddle1Y, PADDLE_THINCKNESS, PADDLE_HEIGHT, 'white')
+
+            colorRect(canvas.width - PADDLE_THINCKNESS, paddle2Y, 
+                    PADDLE_THINCKNESS, PADDLE_HEIGHT, 'white')
+            
             colorCircle(ballX, ballY, 10, 'white')
         }
         
